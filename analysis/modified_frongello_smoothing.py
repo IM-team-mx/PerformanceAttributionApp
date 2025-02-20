@@ -10,10 +10,8 @@ def apply_smoothing(df, column):
     df[column] = smoothed_values
     return df
 
-def modified_frongello_smoothing(df, start_date, breakdown):
+def modified_frongello_smoothing(df, breakdown):
     df = df.copy()
-    df = df[pd.to_datetime(df["Start Date"]) >= pd.to_datetime(start_date)]
-
     returns_df = df.groupby("Start Date", as_index=False)[["TotalReturn_portfolio", "TotalReturn_benchmark"]].first()
 
     # First factor of the Modified Frongello: average of portfolio compounded returns and benchmark compounded returns

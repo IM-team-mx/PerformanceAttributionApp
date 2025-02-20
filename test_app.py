@@ -18,7 +18,8 @@ model = "Brinson-Fachler"
 # model = "Effects analysis"
 # smoothing = "GRAP"
 smoothing = "Modified frongello"
-reference_date = datetime.date(2019, 12, 31)
+start_date = datetime.date(2019, 12, 31)
+end_date = datetime.date(2020, 10, 6)
 portfolios = ["EUR EQ LARGE CP"]
 # portfolios = ["LIQ EUR CORP"]
 benchmark = "EURO STOXX 50"
@@ -33,7 +34,7 @@ portfolio_df = pd.read_csv(portfolios_file)
 benchmark_df = pd.read_csv(benchmarks_file)
 classifications_df = pd.read_csv(classifications_file)
 
-data_df = prepare_data(portfolios, benchmark, portfolio_df,benchmark_df, classifications_df)
+data_df = prepare_data(portfolios, benchmark, portfolio_df,benchmark_df, classifications_df, start_date, end_date)
 
 if model == "Brinson-Fachler":
     attribution_df = brinson_fachler(data_df, classification_criteria)
@@ -47,11 +48,11 @@ else:
 
 
 if smoothing == "GRAP":
-    smoothed_attribution_df = grap_smoothing(attribution_df, reference_date, classification_criteria)
-    smoothed_instrument_df = grap_smoothing(instruments_df, reference_date, "Product description")
+    smoothed_attribution_df = grap_smoothing(attribution_df, classification_criteria)
+    smoothed_instrument_df = grap_smoothing(instruments_df, "Product description")
 else:
-    smoothed_attribution_df = modified_frongello_smoothing(attribution_df, reference_date, classification_criteria)
-    smoothed_instrument_df = modified_frongello_smoothing(instruments_df, reference_date, "Product description")
+    smoothed_attribution_df = modified_frongello_smoothing(attribution_df, classification_criteria)
+    smoothed_instrument_df = modified_frongello_smoothing(instruments_df, "Product description")
 
 
 print(smoothed_attribution_df)

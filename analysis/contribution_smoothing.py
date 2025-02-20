@@ -5,10 +5,8 @@ def apply_smoothing(df, column, adjustment_factor):
     df[column] = smoothed_values
     return df
 
-def contribution_smoothing(df, start_date, classification_criteria):
+def contribution_smoothing(df, classification_criteria):
     df = df.copy()
-    df = df[pd.to_datetime(df["Start Date"]) >= pd.to_datetime(start_date)]
-
     returns_df = df.groupby("Start Date", as_index=False)[["TotalReturn_portfolio", "TotalReturn_benchmark"]].first()
 
     # Compute cumulative product for portfolio returns

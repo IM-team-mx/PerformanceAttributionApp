@@ -1,13 +1,17 @@
 import pandas as pd
 
-def prepare_data(ptf_list, bm, ptf_df, bm_df, classifications_df):
-    # Filter ptf_df on portfolios in ptf_list and remove unneeded columns
+def prepare_data(ptf_list, bm, ptf_df, bm_df, classifications_df, start_date, end_date):
+    # Filter ptf_df on portfolios in ptf_list, and on the date range, and remove unneeded columns
     ptf_df = ptf_df[ptf_df["Portfolio"].isin(ptf_list)]
+    ptf_df = ptf_df[(pd.to_datetime(ptf_df["Start Date"]) >= pd.to_datetime(start_date)) & 
+                    (pd.to_datetime(ptf_df["End Date"]) <= pd.to_datetime(end_date))]
     ptf_df = ptf_df.drop(["Portfolio", "End Date"], axis=1)
     ptf_df = ptf_df.groupby(["Start Date", "Instrument", "ProductTaxonomy"]).sum().reset_index()
 
-    # Filter bm_df on bm benchmark and remove unneeded columns
+    # Filter bm_df on bm benchmark, and on the date range, and remove unneeded columns
     bm_df = bm_df[bm_df["Benchmark"] == bm]
+    bm_df = bm_df[(pd.to_datetime(bm_df["Start Date"]) >= pd.to_datetime(start_date)) & 
+                  (pd.to_datetime(bm_df["End Date"]) <= pd.to_datetime(end_date))]
     bm_df = bm_df.drop(["Benchmark", "End Date"], axis=1)
 
     merged_df = pd.merge(ptf_df, bm_df, how="outer", on=["Instrument", "ProductTaxonomy", "Start Date"], suffixes=("_portfolio", "_benchmark")).fillna(0)

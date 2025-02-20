@@ -1,10 +1,8 @@
 import pandas as pd
 
 
-def grap_smoothing(df, start_date, breakdown):
+def grap_smoothing(df, breakdown):
     df = df.copy()
-    df = df[pd.to_datetime(df["Start Date"]) >= pd.to_datetime(start_date)]
-
     returns_df = df.groupby("Start Date", as_index=False)[["TotalReturn_portfolio", "TotalReturn_benchmark"]].first()
 
     # Compute cumulative product for portfolio returns

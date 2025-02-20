@@ -1,6 +1,7 @@
 import streamlit as st
 import datetime
 import numpy as np
+import pandas as pd
 from analysis.data_preparation import prepare_data
 from analysis.brinson_fachler import brinson_fachler, brinson_fachler_instrument
 from analysis.brinson_hood_beebower import brinson_hood_beebower, brinson_hood_beebower_instrument
@@ -98,9 +99,11 @@ if correct_format:
     }
 
     if performance_period == "Custom":
-        reference_date = settings_row2[2].date_input("Select custom date", datetime.date(2019, 12, 31))
+        start_date = settings_row2[2].date_input("Select start date", datetime.date(2019, 12, 31))
+        end_date = settings_row2[2].date_input("Select end date", datetime.date(2020, 10, 6))
     else:
-        reference_date = performance_period_date_dict[performance_period]
+        start_date = performance_period_date_dict[performance_period]
+        end_date = pd.to_datetime(portfolio_df["End Date"]).max()
 
     decimal_places = settings_row2[3].segmented_control("Decimal places", [2, 4, 8, 12], default=2)
 
@@ -126,12 +129,12 @@ if correct_format:
             )
 
         # Prepare the data
-        data_df = prepare_data(selected_portfolios, selected_benchmark, portfolio_df, benchmark_df, classifications_df)
+        data_df = prepare_data(selected_portfolios, selected_benchmark, portfolio_df, benchmark_df, classifications_df, start_date, end_date)
 
         # Apply the requested analysis
         if contribution_attribution == "Contribution":
             master_df = contribution(data_df, classification_criteria)
-            master_df = contribution_smoothing(master_df, reference_date, classification_criteria)
+            master_df = contribution_smoothing(master_df, classification_criteria)
         else:
             # Apply the model (without any smoothing)
             if model == "Brinson-Fachler":
@@ -143,9 +146,9 @@ if correct_format:
 
             # Apply the smoothing
             if smoothing_algorithm == "Frongello":
-                master_df = grap_smoothing(master_df, reference_date, classification_criteria)
+                master_df = grap_smoothing(master_df, classification_criteria)
             elif smoothing_algorithm == "Modified Frongello":
-                master_df = modified_frongello_smoothing(master_df, reference_date, classification_criteria)
+                master_df = modified_frongello_smoothing(master_df, classification_criteria)
 
 
         analysis_master_row[1].markdown("**Performance analysis:**")
@@ -166,7 +169,7 @@ if correct_format:
         # Apply the requested analysis at instrument level
         if contribution_attribution == "Contribution":
             instruments_df = contribution_instrument(data_df, classification_criteria, classification_value)
-            details_instruments_df = contribution_smoothing(instruments_df, reference_date, "Product description")
+            details_instruments_df = contribution_smoothing(instruments_df, "Product description")
         else:
             # Apply the model (without any smoothing)
             if model == "Brinson-Fachler":
@@ -178,9 +181,9 @@ if correct_format:
 
             # Apply the smoothing
             if smoothing_algorithm == "Frongello":
-                details_instruments_df = grap_smoothing(instruments_df, reference_date,"Product description")
+                details_instruments_df = grap_smoothing(instruments_df,"Product description")
             elif smoothing_algorithm == "Modified Frongello":
-                details_instruments_df = modified_frongello_smoothing(instruments_df, reference_date, "Product description")
+                details_instruments_df = modified_frongello_smoothing(instruments_df, "Product description")
 
         analysis_details_row[1].markdown("**Instruments details**:")
         analysis_details_row[1].dataframe(
