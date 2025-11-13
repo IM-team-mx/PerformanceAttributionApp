@@ -13,7 +13,9 @@ from analysis import (
     contribution_instrument,
     grap_smoothing,
     modified_frongello_smoothing,
-    contribution_smoothing
+    contribution_smoothing,
+    measurement_analytics_master,
+    measurement_analytics_instrument
 )
 
 # Attribution model registry
@@ -27,7 +29,11 @@ MODEL_REGISTRY = {
         "master": brinson_hood_beebower,
         "instrument": brinson_hood_beebower_instrument
     },
-    "Fixed income attribution": {
+    "Standard fixed income attribution": {
+        "master": effects_analysis,
+        "instrument": effects_analysis_instrument
+    },
+    "with Brinson Fachler on credit (POC)": {
         "master": effects_analysis,
         "instrument": effects_analysis_instrument
     }
@@ -47,3 +53,9 @@ SMOOTHING_REGISTRY = {
 
 # Contribution smoothing function
 CONTRIBUTION_SMOOTHING = contribution_smoothing
+
+# Measurement & Analytics registry
+MEASUREMENT_REGISTRY = {
+    "master": measurement_analytics_master,
+    "instrument": measurement_analytics_instrument
+}

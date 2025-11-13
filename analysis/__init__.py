@@ -10,6 +10,7 @@ from .data_preparation import prepare_data
 from .grap_smoothing import grap_smoothing
 from .modified_frongello_smoothing import modified_frongello_smoothing
 from .contribution_smoothing import contribution_smoothing
+from .measurement_analytics import calculate_measurement_analytics, measurement_analytics_master, measurement_analytics_instrument
 
 __all__ = [
     'brinson_fachler',
@@ -24,4 +25,7 @@ __all__ = [
     'grap_smoothing',
     'modified_frongello_smoothing',
     'contribution_smoothing',
+    'calculate_measurement_analytics',
+    'measurement_analytics_master',
+    'measurement_analytics_instrument',
 ]

@@ -46,8 +46,8 @@ def render_settings(portfolio_df, benchmark_df, data_source_toggle):
         else:
             settings['model'] = settings_row1[3].pills(
                 "Model",
-                ["Fixed income attribution"],
-                default="Fixed income attribution",
+                ["Standard fixed income attribution", "with Brinson Fachler on credit (POC)"],
+                default="Standard fixed income attribution",
                 disabled=True
             )
             settings['effects'] = st.multiselect(

@@ -47,7 +47,7 @@ if not portfolio_df.empty and not benchmark_df.empty:
 if correct_format:
     # User settings
     asset_class = settings_row1[1].pills("Asset class", ["Equity", "Fixed income"], default="Equity", key="asset_class")
-    contribution_attribution = settings_row1[2].pills("Analysis", ["Attribution", "Contribution"], default="Attribution", key="contribution_attribution")
+    contribution_attribution = settings_row1[2].pills("Analysis", ["Attribution", "Contribution", "Measurement & Analytics"], default="Attribution", key="contribution_attribution")
 
     # Model selection in case of Attribution analysis
     if contribution_attribution == "Attribution":
@@ -125,12 +125,17 @@ if correct_format:
     analysis_details_row = st.columns([0.25, 0.75])
 
     if len(selected_portfolios) > 0:
-        # Render classification criteria selector
-        classification_criteria = analysis_master_row[0].radio(
-            "Allocation criteria",
-            CLASSIFICATION_CRITERIA[asset_class],
-            key="classification_criteria"
-        )
+        if contribution_attribution == "Measurement & Analytics":
+            frequency = analysis_master_row[0].pills("Frequency", ["daily", "weekly", "monthly"], default="daily", key="measurement_frequency")
+            classification_criteria = None
+        else:
+            frequency = "daily"
+            # Render classification criteria selector on the left column (only for attribution/contribution)
+            classification_criteria = analysis_master_row[0].radio(
+                "Allocation criteria",
+                CLASSIFICATION_CRITERIA[asset_class],
+                key="classification_criteria"
+            )
 
         # Create settings dict for analysis
         settings = {
@@ -140,7 +145,8 @@ if correct_format:
             'benchmark': selected_benchmark,
             'start_date': start_date,
             'end_date': end_date,
-            'decimals': decimal_places
+            'decimals': decimal_places,
+            'frequency': frequency
         }
 
         if contribution_attribution == "Attribution":
@@ -158,37 +164,52 @@ if correct_format:
             classification_criteria
         )
 
-        # Display master-level results
-        analysis_master_row[1].markdown("**Performance analysis:**")
-        analysis_master_row[1].dataframe(
-            style_dataframe(master_df, settings['decimals']),
-            hide_index=True,
-            width=1000,
-            height=dataframe_height(master_df)
-        )
+        # Display results depending on analysis type
+        if contribution_attribution == "Measurement & Analytics":
+            analysis_master_row[1].markdown("**Return vs Benchmark chart**")
+            chart_df = master_df.set_index("Date")
+            analysis_master_row[1].line_chart(chart_df)
+            # Display instrument-level measurement analytics (volatility table, etc.)
+            analysis_details_row[1].markdown("**Measurement analytics:**")
+            details_df = get_instruments(None)
+            analysis_details_row[1].dataframe(
+                style_dataframe(details_df, settings['decimals']),
+                hide_index=True,
+                width=1000,
+                height=dataframe_height(details_df)
+            )
+        else:
+            # Display master-level results for Attribution/Contribution
+            analysis_master_row[1].markdown("**Performance analysis:**")
+            analysis_master_row[1].dataframe(
+                style_dataframe(master_df, settings['decimals']),
+                hide_index=True,
+                width=1000,
+                height=dataframe_height(master_df)
+            )
 
-        # Get classification values for drill-down
-        classification_values = [
-            val for val in master_df[classification_criteria].to_list()
-            if val not in ["Total"]
-        ]
+            # Get classification values for drill-down
+            classification_values = [
+                val for val in master_df[classification_criteria].to_list()
+                if val not in ["Total"]
+            ]
 
-        # Render classification value selector
-        classification_value = analysis_details_row[0].radio(
-            f"Select a {classification_criteria}:",
-            classification_values,
-            key="classification_value"
-        )
+            # Render classification value selector
+            classification_value = analysis_details_row[0].radio(
+                f"Select a {classification_criteria}:",
+                classification_values,
+                key="classification_value"
+            )
 
-        # Get instrument-level details
-        details_df = get_instruments(classification_value)
+            # Get instrument-level details
+            details_df = get_instruments(classification_value)
 
-        # Display instrument-level results
-        analysis_details_row[1].markdown("**Instruments details:**")
-        analysis_details_row[1].dataframe(
-            style_dataframe(details_df, settings['decimals']),
-            hide_index=True,
-            width=1000,
-            height=dataframe_height(details_df)
-        )
+            # Display instrument-level results
+            analysis_details_row[1].markdown("**Instruments details:**")
+            analysis_details_row[1].dataframe(
+                style_dataframe(details_df, settings['decimals']),
+                hide_index=True,
+                width=1000,
+                height=dataframe_height(details_df)
+            )
 
